@@ -1,0 +1,1 @@
+{"version":3,"file":"apiFunction.d.ts","sourceRoot":"","sources":["../../src/templates/apiFunction.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,QAAQ,EAAE,MAAM,2BAA2B,CAAC;AAGrD;;GAEG;AACH,wBAAgB,mBAAmB,CAAC,QAAQ,EAAE,QAAQ,EAAE,WAAW,EAAE,MAAM,GAAG;IAAE,YAAY,EAAE,MAAM,CAAC;IAAC,IAAI,EAAE,MAAM,CAAA;CAAE,CAwFnH"}

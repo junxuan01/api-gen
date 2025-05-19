@@ -1,0 +1,444 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "订单服务API",
+    "description": "处理订单相关的API",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3001/api",
+      "description": "订单服务开发服务器"
+    }
+  ],
+  "tags": [
+    {
+      "name": "order",
+      "description": "订单相关接口"
+    },
+    {
+      "name": "payment",
+      "description": "支付相关接口"
+    }
+  ],
+  "paths": {
+    "/orders": {
+      "get": {
+        "summary": "获取订单列表",
+        "tags": ["order"],
+        "operationId": "getOrderList",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "页码",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "每页条数",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 10
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "description": "订单状态",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["pending", "paid", "shipping", "completed", "cancelled"]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功获取订单列表",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderListResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "创建订单",
+        "tags": ["order"],
+        "operationId": "createOrder",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrderCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "成功创建订单",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Order"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/orders/{id}": {
+      "get": {
+        "summary": "获取订单详情",
+        "tags": ["order"],
+        "operationId": "getOrderById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "订单ID",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功获取订单详情",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Order"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "更新订单",
+        "tags": ["order"],
+        "operationId": "updateOrder",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "订单ID",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrderUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功更新订单",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Order"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "取消订单",
+        "tags": ["order"],
+        "operationId": "cancelOrder",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "订单ID",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "成功取消订单"
+          }
+        }
+      }
+    },
+    "/payments": {
+      "post": {
+        "summary": "创建支付",
+        "tags": ["payment"],
+        "operationId": "createPayment",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PaymentCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "成功创建支付",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Payment"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/payments/{id}": {
+      "get": {
+        "summary": "获取支付详情",
+        "tags": ["payment"],
+        "operationId": "getPaymentById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "支付ID",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功获取支付详情",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Payment"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Order": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "订单ID"
+          },
+          "userId": {
+            "type": "integer",
+            "description": "用户ID"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrderItem"
+            },
+            "description": "订单项"
+          },
+          "totalAmount": {
+            "type": "number",
+            "format": "float",
+            "description": "订单总金额"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["pending", "paid", "shipping", "completed", "cancelled"],
+            "description": "订单状态"
+          },
+          "address": {
+            "type": "string",
+            "description": "收货地址"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "创建时间"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "更新时间"
+          }
+        },
+        "required": ["id", "userId", "items", "totalAmount", "status"]
+      },
+      "OrderItem": {
+        "type": "object",
+        "properties": {
+          "productId": {
+            "type": "integer",
+            "description": "产品ID"
+          },
+          "quantity": {
+            "type": "integer",
+            "description": "数量"
+          },
+          "price": {
+            "type": "number",
+            "format": "float",
+            "description": "单价"
+          },
+          "name": {
+            "type": "string",
+            "description": "产品名称"
+          }
+        },
+        "required": ["productId", "quantity", "price", "name"]
+      },
+      "OrderCreate": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "integer",
+            "description": "用户ID"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "productId": {
+                  "type": "integer",
+                  "description": "产品ID"
+                },
+                "quantity": {
+                  "type": "integer",
+                  "description": "数量"
+                }
+              },
+              "required": ["productId", "quantity"]
+            },
+            "description": "订单项"
+          },
+          "address": {
+            "type": "string",
+            "description": "收货地址"
+          }
+        },
+        "required": ["userId", "items", "address"]
+      },
+      "OrderUpdate": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": ["pending", "paid", "shipping", "completed", "cancelled"],
+            "description": "订单状态"
+          },
+          "address": {
+            "type": "string",
+            "description": "收货地址"
+          }
+        }
+      },
+      "OrderListResponse": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "integer",
+            "description": "总条数"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Order"
+            }
+          }
+        }
+      },
+      "Payment": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "支付ID"
+          },
+          "orderId": {
+            "type": "integer",
+            "description": "订单ID"
+          },
+          "amount": {
+            "type": "number",
+            "format": "float",
+            "description": "支付金额"
+          },
+          "method": {
+            "type": "string",
+            "enum": ["creditCard", "debitCard", "paypal", "alipay", "wechat"],
+            "description": "支付方式"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["pending", "success", "failed"],
+            "description": "支付状态"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "创建时间"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "更新时间"
+          }
+        },
+        "required": ["id", "orderId", "amount", "method", "status"]
+      },
+      "PaymentCreate": {
+        "type": "object",
+        "properties": {
+          "orderId": {
+            "type": "integer",
+            "description": "订单ID"
+          },
+          "amount": {
+            "type": "number",
+            "format": "float",
+            "description": "支付金额"
+          },
+          "method": {
+            "type": "string",
+            "enum": ["creditCard", "debitCard", "paypal", "alipay", "wechat"],
+            "description": "支付方式"
+          }
+        },
+        "required": ["orderId", "amount", "method"]
+      }
+    }
+  }
+}
