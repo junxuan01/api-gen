@@ -1,0 +1,13 @@
+/**
+ * API-GEN 配置示例
+ *
+ * 可以通过 `bun run api init` 命令生成此文件
+ */
+{
+  "apifoxUrl": "https://your-apifox-openapi-url-here",
+  "outputDir": "./api",
+  "generateIndex": true,
+  "prettierFormat": true,
+  "baseURL": "/api",
+  "timeout": 30000
+}

@@ -1,0 +1,21 @@
+# bunfig.toml
+# Bun 配置文件
+
+[install]
+# 使用 pnpm 兼容模式
+pnpm = true
+
+[test]
+# 测试相关配置可以在这里添加
+
+# Bun 的模块解析配置
+[resolve]
+# 路径别名配置
+bazel = false
+
+[resolve.paths]
+"@/*" = "./src/*"
+"@config/*" = "./src/config/*"
+"@templates/*" = "./src/templates/*" 
+"@types/*" = "./src/types/*"
+"@utils/*" = "./src/utils/*"

@@ -1,0 +1,16 @@
+{
+  "apifoxUrl": "https://api.example.com/openapi.json",
+  "outputDir": "./api",
+  "baseURL": "https://api.example.com",
+  "prettierFormat": true,
+  "generateIndex": true,
+  "requestLib": "axios",
+  "tagGrouping": true,
+  "useTypeAlias": true,
+  "requestImport": "./utils/request",
+  "includeCommonDir": true,
+  "commonTypesPath": "./dtos/common",
+  "requestFnSuffix": "",
+  "typeFilePrefix": "",
+  "requestFilePrefix": ""
+}
