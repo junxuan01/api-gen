@@ -10,7 +10,7 @@ import type {
   OpenApiParameterObject,
   OpenApiResponseObject,
 } from "../types/openapi.js";
-import openapiTS from "openapi-typescript";
+import openapiTS, { astToString } from "openapi-typescript";
 import { writeFile } from "./file.js";
 import type { Config } from "../config/index.js";
 
@@ -114,20 +114,65 @@ export function parseApiGroups(document: OpenApiDocument): ApiGroupInfo[] {
 
 /**
  * 生成TypeScript类型定义
+ * 
+ * 使用 openapi-typescript 从 OpenAPI 规范生成 TypeScript 类型定义
+ * 按照官方文档 (https://openapi-ts.dev/node) 推荐的方法实现
  *
- * @param document OpenAPI文档
+ * @param document OpenAPI文档或URL
  * @returns 生成的类型定义和各个DTO的定义
  */
 export async function generateTypeDefinitions(
-  document: OpenApiDocument
+  document: OpenApiDocument | string
 ): Promise<{ schema: string; dtos: Record<string, string> }> {
   try {
-    // 从对象生成类型定义
-    const schemaNodes = await openapiTS(document as any);
-    const schema = schemaNodes.toString();
+    console.log("开始生成 TypeScript 类型定义...");
+    
+    let ast;
+    let schemaString = "";
+    
+    // 情况1: document 是 URL 字符串 - 直接传给 openapiTS
+    if (typeof document === "string" && (document.startsWith("http") || document.startsWith("file"))) {
+      console.log(`从 URL 生成类型定义: ${document}`);
+      ast = await openapiTS(document);
+      schemaString = astToString(ast);
+      console.log("从 URL 成功生成类型定义");
+    }
+    // 情况2: document 是对象 - 写入临时文件并使用文件路径
+    else {
+      console.log("从内存中的 OpenAPI 对象生成类型定义");
+      
+      // 创建临时文件
+      const tmpDir = path.join(process.cwd(), "tmp");
+      await fs.ensureDir(tmpDir);
+      const tmpFile = path.join(tmpDir, `openapi-${Date.now()}.json`);
+      
+      try {
+        // 写入文档
+        await fs.writeJSON(tmpFile, document, { spaces: 2 });
+        console.log(`已将 OpenAPI 规范写入临时文件: ${tmpFile}`);
+        
+        // 使用文件路径生成类型
+        ast = await openapiTS(tmpFile);
+        schemaString = astToString(ast);
+        console.log("从临时文件成功生成类型定义");
+      } finally {
+        // 清理临时文件
+        try {
+          await fs.remove(tmpFile);
+          console.log("已清理临时文件");
+        } catch (e) {
+          console.warn("清理临时文件失败:", e);
+        }
+      }
+    }
+    
+    // 添加一些帮助注释
+    const schema = `// 由 api-gen 使用 openapi-typescript 从 OpenAPI 规范生成的类型定义\n${schemaString}`;
 
     // 提取DTO定义
-    const dtoDefinitions = extractResponseDTOs(document);
+    const dtoDefinitions = typeof document === "string" 
+      ? [] // 如果是URL，我们没有对象，无法提取DTO
+      : extractResponseDTOs(document);
 
     // 处理DTO定义，并按名称分类
     const dtos: Record<string, string> = {};
@@ -145,8 +190,8 @@ export async function generateTypeDefinitions(
       dtos,
     };
   } catch (error) {
-    console.error("生成TypeScript类型定义失败:", error);
-    throw new Error(`生成TypeScript类型定义失败: ${error}`);
+    console.error("生成 TypeScript 类型定义失败:", error);
+    throw new Error(`生成 TypeScript 类型定义失败: ${error}`);
   }
 }
 
